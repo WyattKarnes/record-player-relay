@@ -1,0 +1,21 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Record Player</title>
+<body>
+<script>
+  // Spotify sends the phone here after login with ?code=...&state=...
+  // state is "<nonce>~<address>", where address is the player's LAN IP (plus :port if not 80).
+  // Forward the whole query string to the player so it can finish the login.
+  const q = new URLSearchParams(location.search);
+  const address = (q.get("state") || "").split("~")[1] || "";
+  // Only forward to a private home-network address (10.x, 172.16-31.x, 192.168.x),
+  // with an optional port -- never to an arbitrary site.
+  const privateAddress = /^(10\.\d{1,3}|172\.(1[6-9]|2\d|3[01])|192\.168)\.\d{1,3}\.\d{1,3}(:\d{1,5})?$/;
+  if (privateAddress.test(address)) {
+    location.replace("http://" + address + "/spotify/callback" + location.search);
+  } else {
+    document.body.textContent = "Something went wrong. Go back to your record player's setup page.";
+  }
+</script>
+</body>
